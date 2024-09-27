@@ -35,7 +35,7 @@ object RecipeMain extends App {
 
   val serverPort = sys.env.getOrElse("PORT", "8080").toInt
 
-  val bindingFuture = Http().newServerAt("localhost", serverPort).bindFlow(RecipeRoutes.routes)
+  val bindingFuture = Http().newServerAt("0.0.0.0", serverPort).bindFlow(RecipeRoutes.routes)
 
   bindingFuture onComplete {
     case Success(answer) =>
