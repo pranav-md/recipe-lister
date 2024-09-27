@@ -28,3 +28,19 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-protobuf-v3" % "2.8.0-M1"
   )
 }
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.7.6")
+
+val stage = taskKey[Unit]("Stage task")
+
+val Stage = config("stage")
+
+stage := {
+  (packageWar in Compile).value
+  (update in Stage).value.allFiles.foreach { f =>
+    if (f.getName.matches("webapp-runner-[0-9\\.]+.jar")) {
+      println("copying " + f.getName)
+      IO.copyFile(f, baseDirectory.value / "target" / "webapp-runner.jar")
+    }
+  }
+}
