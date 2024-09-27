@@ -8,6 +8,7 @@ import akka.http.scaladsl.server.Directives._
 import Domain.RecipeRequestImplicits._
 import Domain.RecipeResponseImplicits._
 import Domain.DeleteResponseImplicits._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -15,6 +16,7 @@ import MarshallerImplicits.AkkaCirceSupport._
 import io.circe.syntax._
 import Domain.RequestResponseImplicits._
 import Domain.RequestExceptionResponseImplicits._
+import io.circe.{Json, JsonObject}
 
 
 object RecipeRoutes {
@@ -53,7 +55,8 @@ object RecipeRoutes {
     val recipes = RecipeService.getAllRecipes()
     onComplete(recipes.map(RequestResponse[RecipeResponse]("", _))) {
       case Success(resp) =>
-        val response = resp.asJson.mapObject(_.remove("message"))
+        val response = renameField(resp.asJson, "recipe", "recipes")
+          .mapObject(_.remove("message"))
         complete(HttpEntity(ContentTypes.`application/json`, response.noSpaces))
     }
   }
@@ -117,4 +120,16 @@ object RecipeRoutes {
     MissingFields(missingFields)
   }
 
+  def renameField(json: Json, oldField: String, newField: String): Json = {
+    json.asObject.map { jsonObj =>
+      // Convert JsonObject to Map and rename the field
+      val updatedJsonObj = JsonObject.fromMap(
+        jsonObj.toMap.map {
+          case (`oldField`, value) => newField -> value  // Rename the field
+          case other => other                            // Keep the rest unchanged
+        }
+      )
+      Json.fromJsonObject(updatedJsonObj)
+    }
+  }.getOrElse(Json.obj())
 }
