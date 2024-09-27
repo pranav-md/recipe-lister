@@ -7,3 +7,5 @@
 .ammonite/
 target
 .idea
+project/target
+project/project

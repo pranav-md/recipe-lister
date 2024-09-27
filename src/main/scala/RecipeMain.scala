@@ -10,10 +10,10 @@ import slick.jdbc.JdbcBackend.Database
 
 import scala.concurrent.ExecutionContextExecutor
 
-object Main extends App {
+object RecipeMain extends App {
 
   val pattern = "postgres://(.*):(.*)@(.*):(\\d+)/(.*)".r
-  val pattern(username, password, host, port, dbName) = "postgres://u2gs3teph4c6r1:p62927feff907726727bb3e864fd1fc592ba5ee51b809106ef0c0097e59b00c1f@cbec45869p4jbu.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d7b32tv8s2pjet"
+  val pattern(username, password, host, port, dbName) = ""
 
   // Create HikariCP configuration
   val hikariConfig = new HikariConfig()
