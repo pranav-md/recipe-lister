@@ -5,5 +5,5 @@
 *.minimal
 .DS_Store
 .ammonite/
-.target
+target
 .idea

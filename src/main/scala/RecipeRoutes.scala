@@ -23,7 +23,7 @@ object RecipeRoutes {
 
   val routes: Route = DebuggingDirectives.logRequest("recipes") {
     pathPrefix(RECIPE_ROUTE) {
-      createRecipeRequest ~ getRecipeRequest ~ getRecipeById ~ updateRecipeById ~ deleteRecipeById
+      createRecipeRequest ~ getRecipeById ~ getRecipeRequest ~ updateRecipeById ~ deleteRecipeById
     }
   }
 
@@ -50,10 +50,8 @@ object RecipeRoutes {
   }
 
   val getRecipeRequest = get {
-    onComplete {
-      val recipes = RecipeService.getAllRecipes()
-      recipes.map(RequestResponse[RecipeResponse]("", _))
-    } {
+    val recipes = RecipeService.getAllRecipes()
+    onComplete(recipes.map(RequestResponse[RecipeResponse]("", _))) {
       case Success(resp) =>
         val response = resp.asJson.mapObject(_.remove("message"))
         complete(HttpEntity(ContentTypes.`application/json`, response.noSpaces))

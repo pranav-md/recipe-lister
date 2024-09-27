@@ -8,7 +8,6 @@ import scala.util.{Failure, Success, Try}
 
 object RecipeService {
 
-
   def createRecipe(recipe: RecipeBase): Future[Recipe] = {
     val recipeRes = RecipeStore.createRecipe(recipe)
     recipeRes.map(_.getRecipeWithAllFields())
@@ -30,6 +29,10 @@ object RecipeService {
   }
 
   def deleteRecipeById(recipeId: Long): Future[Int] = {
-    RecipeStore.deleteRecipe(recipeId)
+    for {
+      _ <- RecipeStore.getRecipeById(recipeId)
+      res <- RecipeStore.deleteRecipe(recipeId)
+    }
+    yield res
   }
 }

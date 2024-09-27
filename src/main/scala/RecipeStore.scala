@@ -61,7 +61,7 @@ object RecipeStore {
 
   def updateRecipe(recipe: RecipeBase, id: Long): Future[RecipeTable] = {
     // Fetch all recipes
-    val recipeToUpdate = RecipeTable(title = recipe.title.getOrElse(""),
+    val recipeToUpdate = RecipeTable(Some(id), title = recipe.title.getOrElse(""),
       making_time = recipe.making_time.getOrElse(""),
       serves = recipe.serves.getOrElse(""), ingredients = recipe.ingredients.getOrElse(""),
       cost = recipe.cost.getOrElse(0), created_at = Instant.now(), updated_at = Instant.now)
