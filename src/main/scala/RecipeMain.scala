@@ -2,6 +2,7 @@
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.{ActorMaterializer, Materializer}
+import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import slick.jdbc.PostgresProfile
 
@@ -11,9 +12,10 @@ import slick.jdbc.JdbcBackend.Database
 import scala.concurrent.ExecutionContextExecutor
 
 object RecipeMain extends App {
+  val config = ConfigFactory.load()
 
   val pattern = "postgres://(.*):(.*)@(.*):(\\d+)/(.*)".r
-  val pattern(username, password, host, port, dbName) = ""
+  val pattern(username, password, host, port, dbName) = config.getString("databaseUrl.properties.url")
 
   // Create HikariCP configuration
   val hikariConfig = new HikariConfig()
