@@ -39,7 +39,7 @@ object RecipeMain extends App {
 
   bindingFuture onComplete {
     case Success(answer) =>
-      println(s"Server online at http://localhost:8080/\n")
+      println(s"Server online at http://localhost:$serverPort/\n")
 
     case Failure(msg) =>
       println(s"Service failed: $msg, exiting")

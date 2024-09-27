@@ -1,1 +1,1 @@
-web: target/universal/stage/bin/recipe-lister -Dhttp.port=8080
+web: target/universal/stage/bin/recipe-lister -Dhttp.port=$PORT
