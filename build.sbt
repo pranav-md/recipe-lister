@@ -28,3 +28,5 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-protobuf-v3" % "2.8.0-M1"
   )
 }
+
+enablePlugins(JavaAppPackaging)
