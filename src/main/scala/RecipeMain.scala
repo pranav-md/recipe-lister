@@ -33,7 +33,9 @@ object RecipeMain extends App {
   implicit val materializer: Materializer = Materializer(system)
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-  val bindingFuture = Http().newServerAt("localhost", 8080).bindFlow(RecipeRoutes.routes)
+  val serverPort = sys.env.getOrElse("PORT", "8080").toInt
+
+  val bindingFuture = Http().newServerAt("localhost", serverPort).bindFlow(RecipeRoutes.routes)
 
   bindingFuture onComplete {
     case Success(answer) =>
