@@ -1,5 +1,5 @@
 import Domain.{RecipeBase, RecipeResponse}
-import RecipeApp.db
+import Main.db
 import RecipeTableSchemas.{RecipeTable, Recipes, recipesBaseQuery}
 import slick.jdbc.PostgresProfile.api._
 
