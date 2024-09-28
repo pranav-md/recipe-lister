@@ -3,7 +3,7 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives.complete
 import akka.http.scaladsl.server.StandardRoute
 import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller}
-import io.circe.{Decoder, Encoder, Json, JsonObject}
+import io.circe.{Decoder, Json, JsonObject}
 import io.circe.jawn.decode
 
 import scala.concurrent.Future
