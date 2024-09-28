@@ -19,10 +19,11 @@ object RecipeService {
     recipeRes.map(_.getRecipeDetails())
   }
 
-  def updateRecipeById(recipeId: Long, recipe: RecipeBase): Future[RecipeSubset] = {
-    val recipeRes = RecipeStore.updateRecipe(recipe, recipeId)
-    recipeRes.map(_.getRecipeSubset())
-  }
+  def updateRecipeById(recipeId: Long, recipe: RecipeBase): Future[RecipeSubset] =
+    for {
+      _ <- RecipeStore.getRecipeById(recipeId)
+      res <- RecipeStore.updateRecipe(recipe, recipeId)
+    } yield res.getRecipeSubset()
 
   def deleteRecipeById(recipeId: Long): Future[Int] = {
     for {

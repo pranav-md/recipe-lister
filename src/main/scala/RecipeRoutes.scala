@@ -83,14 +83,12 @@ object RecipeRoutes extends LazyLogging {
   val updateRecipeById = path(PathMatchers.LongNumber) { recipeId =>
     patch {
       entity(as[RecipeSubset]) { body =>
-        onComplete {
-          val response = RecipeService.updateRecipeById(recipeId, body)
-          response.map(recipe => RequestResponse[RecipeSubset](
-            ResponseMessages.UPDATE_SUCCESS,
-            List(recipe)))
-        } {
-          case Success(resp) =>
-            completeResponse(resp.asJson)
+        onComplete (RecipeService.updateRecipeById(recipeId, body)) {
+          case Success(updatedRecipe) =>
+            val response = RequestResponse[RecipeSubset](
+              ResponseMessages.UPDATE_SUCCESS,
+              List(updatedRecipe))
+            completeResponse(response.asJson)
           case Failure(_) =>
             complete(StatusCodes.NotFound -> s"Recipe with id $recipeId not found.")
         }
