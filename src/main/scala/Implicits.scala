@@ -4,29 +4,27 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 object Implicits {
 
-  object RecipeRequestImplicits {
+  object RecipeSubsetImplicits {
     implicit val recipeRequestDecoder: Decoder[RecipeSubset] = deriveDecoder[RecipeSubset]
     implicit val recipeRequestEncoder: Encoder.AsObject[RecipeSubset] = deriveEncoder[RecipeSubset]
   }
 
-  object RecipeResponseImplicits {
+  object RecipeWithIdImplicits {
     implicit val recipeResponseDecoder: Decoder[RecipeWithId] = deriveDecoder[RecipeWithId]
     implicit val recipeResponseEncoder: Encoder.AsObject[RecipeWithId] = deriveEncoder[RecipeWithId]
   }
 
+  object RecipeFullImplicits {
+    implicit val recipeEncoder: Encoder[RecipeFull] = deriveEncoder[RecipeFull]
+    implicit val recipeDecoder: Decoder[RecipeFull] = deriveDecoder[RecipeFull]
+  }
 
   object DeleteResponseImplicits {
     implicit val deleteResponseEncoder: Encoder[DeleteResponse] = deriveEncoder[DeleteResponse]
     implicit val deleteResponseDecoder: Decoder[DeleteResponse] = deriveDecoder[DeleteResponse]
   }
+
   object RequestResponseImplicits {
-    // Encoder and Decoder for RecipeBase
-
-    import RecipeRequestImplicits._
-    import RecipeResponseImplicits._
-
-    implicit val recipeEncoder: Encoder[RecipeFull] = deriveEncoder[RecipeFull]
-    implicit val recipeDecoder: Decoder[RecipeFull] = deriveDecoder[RecipeFull]
 
     // Encoder and Decoder for RequestResponse
     implicit def requestResponseEncoder[T <: RecipeBase : Encoder]: Encoder[RequestResponse[T]] =
@@ -37,8 +35,6 @@ object Implicits {
   }
 
   object RequestExceptionResponseImplicits {
-    // Encoder and Decoder for RecipeBase
-
     implicit val requestExceptionResponseEncoder: Encoder[RequestExceptionResponse] = deriveEncoder[RequestExceptionResponse]
     implicit val requestExceptionResponseDecoder: Decoder[RequestExceptionResponse] = deriveDecoder[RequestExceptionResponse]
   }

@@ -1,9 +1,8 @@
-import Domain.{RecipeBase, RecipeWithId}
+import Domain.RecipeBase
 import RecipeMain.db
-import RecipeTableSchemas.{RecipeTable, Recipes, recipesBaseQuery}
+import RecipeTableSchemas.{RecipeTable, recipesBaseQuery}
 import com.typesafe.scalalogging.LazyLogging
 import slick.jdbc.PostgresProfile.api._
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.time.Instant
 import scala.concurrent.Future

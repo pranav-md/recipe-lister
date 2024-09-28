@@ -1,14 +1,14 @@
-import Domain.{DeleteResponse, RecipeFull, RecipeBase, RecipeWithId, RecipeSubset, RequestExceptionResponse, RequestResponse, ResponseMessages}
+import Domain.{DeleteResponse, RecipeFull, RecipeWithId, RecipeSubset, RequestExceptionResponse, RequestResponse, ResponseMessages}
 import Domain.MissingFields
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives.{complete, get, onComplete, path, pathPrefix}
-import akka.http.scaladsl.server.{Directive1, MalformedRequestContentRejection, PathMatchers, Route}
+import akka.http.scaladsl.server.{PathMatchers, Route}
 import akka.http.scaladsl.server.directives.DebuggingDirectives
 import akka.http.scaladsl.server.Directives._
-import Implicits.RecipeRequestImplicits._
-import Implicits.RecipeResponseImplicits._
+import Implicits.RecipeSubsetImplicits._
+import Implicits.RecipeWithIdImplicits._
 import Implicits.DeleteResponseImplicits._
-
+import Implicits.RecipeFullImplicits._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -17,7 +17,7 @@ import io.circe.syntax._
 import Implicits.RequestResponseImplicits._
 import Implicits.RequestExceptionResponseImplicits._
 import Helper.{completeResponse, renameField, validateRecipe}
-import com.typesafe.scalalogging.{LazyLogging, Logger}
+import com.typesafe.scalalogging.LazyLogging
 
 object RecipeRoutes extends LazyLogging {
 

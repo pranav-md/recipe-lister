@@ -30,8 +30,8 @@ object Helper {
       // Convert JsonObject to Map and rename the field
       val updatedJsonObj = JsonObject.fromMap(
         jsonObj.toMap.map {
-          case (`oldField`, value) => newField -> value  // Rename the field
-          case other => other                            // Keep the rest unchanged
+          case (`oldField`, value) => newField -> value // Rename the field
+          case other => other // Keep the rest unchanged
         }
       )
       Json.fromJsonObject(updatedJsonObj)
@@ -48,8 +48,10 @@ object Helper {
 
       implicit final def unmarshaller[E: Decoder]: FromEntityUnmarshaller[E] = {
         Unmarshaller.stringUnmarshaller
-          .flatMap { context => materialiser => json =>
-            decode[E](json).fold(Future.failed, Future.successful)
+          .flatMap { context =>
+            materialiser =>
+              json =>
+                decode[E](json).fold(Future.failed, Future.successful)
           }
       }
 

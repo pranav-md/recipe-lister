@@ -1,7 +1,4 @@
 import java.time.Instant
-import io.circe._
-import io.circe.generic.semiauto._
-import io.circe.syntax._
 
 object Domain {
 
@@ -14,12 +11,12 @@ object Domain {
   }
 
   case class RecipeSubset(
-                            title: Option[String],
-                            making_time: Option[String],
-                            serves: Option[String],
-                            ingredients: Option[String],
-                            cost: Option[Long]
-                          ) extends RecipeBase
+                           title: Option[String],
+                           making_time: Option[String],
+                           serves: Option[String],
+                           ingredients: Option[String],
+                           cost: Option[Long]
+                         ) extends RecipeBase
 
 
   case class RecipeWithId(id: Option[Long],

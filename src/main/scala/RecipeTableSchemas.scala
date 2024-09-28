@@ -1,8 +1,5 @@
 import Domain.{RecipeFull, RecipeWithId, RecipeSubset}
 import slick.jdbc.PostgresProfile.api._
-import slick.lifted.ProvenShape
-
-import java.sql.Timestamp
 import java.time.Instant
 
 
