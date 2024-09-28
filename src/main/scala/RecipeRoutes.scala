@@ -9,11 +9,10 @@ import Implicits.RecipeSubsetImplicits._
 import Implicits.RecipeWithIdImplicits._
 import Implicits.DeleteResponseImplicits._
 import Implicits.RecipeFullImplicits._
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import Helper.MarshallerImplicits.AkkaCirceSupport._
+import Helper.MarshallerImplicits._
 import io.circe.syntax._
 import Implicits.RequestResponseImplicits._
 import Implicits.RequestExceptionResponseImplicits._
@@ -32,7 +31,7 @@ object RecipeRoutes extends LazyLogging {
 
   val createRecipeRequest = post {
     entity(as[RecipeSubset]) { body =>
-      val res = validateRecipe(body) match {
+      val recipeCreation = validateRecipe(body) match {
         case missingFields: MissingFields if missingFields.fields.isEmpty =>
           val insertedRecipeFuture = RecipeService.createRecipe(body)
           insertedRecipeFuture.transform {
@@ -47,7 +46,7 @@ object RecipeRoutes extends LazyLogging {
           Future(res.asJson)
       }
 
-      onComplete(res) {
+      onComplete(recipeCreation) {
         case Success(response) =>
           completeResponse(response.asJson)
       }
