@@ -1,10 +1,11 @@
 import Domain.{MissingFields, RecipeBase}
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives.complete
 import akka.http.scaladsl.server.StandardRoute
 import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller}
-import io.circe.{Decoder, Json, JsonObject}
+import io.circe.{Decoder, Encoder, Json, JsonObject}
 import io.circe.jawn.decode
+
 import scala.concurrent.Future
 
 object Helper {
@@ -35,7 +36,7 @@ object Helper {
   }.getOrElse(Json.obj())
 
   def completeResponse(resp: Json): StandardRoute =
-    complete(StatusCodes.OK, resp.noSpaces)
+    complete(HttpEntity(ContentTypes.`application/json`, resp.noSpaces))
 
   object MarshallerImplicits {
     implicit final def unmarshaller[E: Decoder]: FromEntityUnmarshaller[E] = {
