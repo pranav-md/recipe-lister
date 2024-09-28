@@ -3,6 +3,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.{ActorMaterializer, Materializer}
 import com.typesafe.config.ConfigFactory
+import com.typesafe.scalalogging.LazyLogging
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import slick.jdbc.PostgresProfile
 
@@ -11,7 +12,7 @@ import slick.jdbc.JdbcBackend.Database
 
 import scala.concurrent.ExecutionContextExecutor
 
-object RecipeMain extends App {
+object RecipeMain extends App with LazyLogging {
   val config = ConfigFactory.load()
 
   val pattern = "postgres://(.*):(.*)@(.*):(\\d+)/(.*)".r
@@ -39,10 +40,10 @@ object RecipeMain extends App {
 
   bindingFuture onComplete {
     case Success(answer) =>
-      println(s"Server online at http://localhost:$serverPort/\n")
+      logger.info(s"Server online at http://localhost:$serverPort/\n")
 
     case Failure(msg) =>
-      println(s"Service failed: $msg, exiting")
+      logger.error(s"Service failed: $msg, exiting")
       System.exit(1)
   }
 }

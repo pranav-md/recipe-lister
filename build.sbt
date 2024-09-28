@@ -25,7 +25,8 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-testkit" % "10.5.0-M1" % Test,
     "com.typesafe.akka" %% "akka-http-jackson" % "10.5.0-M1",
     "com.typesafe.akka" %% "akka-testkit" % "2.8.0-M1" % Test,
-    "com.typesafe.akka" %% "akka-protobuf-v3" % "2.8.0-M1"
+    "com.typesafe.akka" %% "akka-protobuf-v3" % "2.8.0-M1",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
   )
 }
 

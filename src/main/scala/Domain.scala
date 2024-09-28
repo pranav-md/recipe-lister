@@ -21,32 +21,23 @@ object Domain {
                             cost: Option[Long]
                           ) extends RecipeBase
 
-  object RecipeRequestImplicits {
-    implicit val recipeRequestDecoder: Decoder[RecipeSubset] = deriveDecoder[RecipeSubset]
-    implicit val recipeRequestEncoder: Encoder.AsObject[RecipeSubset] = deriveEncoder[RecipeSubset]
-  }
 
-  object RecipeResponseImplicits {
-    implicit val recipeResponseDecoder: Decoder[RecipeResponse] = deriveDecoder[RecipeResponse]
-    implicit val recipeResponseEncoder: Encoder.AsObject[RecipeResponse] = deriveEncoder[RecipeResponse]
-  }
-
-  case class RecipeResponse(id: Option[Long],
-                            val title: Option[String] = None,
-                            val making_time: Option[String] = None,
-                            val serves: Option[String] = None,
-                            val ingredients: Option[String] = None,
-                            val cost: Option[Long] = None) extends RecipeBase
+  case class RecipeWithId(id: Option[Long],
+                          val title: Option[String] = None,
+                          val making_time: Option[String] = None,
+                          val serves: Option[String] = None,
+                          val ingredients: Option[String] = None,
+                          val cost: Option[Long] = None) extends RecipeBase
 
 
-  case class Recipe(id: Option[Long] = None,
-                    val title: Option[String] = None,
-                    val making_time: Option[String] = None,
-                    val serves: Option[String] = None,
-                    val ingredients: Option[String] = None,
-                    val cost: Option[Long] = None,
-                    created_at: Instant,
-                    updated_at: Instant) extends RecipeBase
+  case class RecipeFull(id: Option[Long] = None,
+                        val title: Option[String] = None,
+                        val making_time: Option[String] = None,
+                        val serves: Option[String] = None,
+                        val ingredients: Option[String] = None,
+                        val cost: Option[Long] = None,
+                        created_at: Instant,
+                        updated_at: Instant) extends RecipeBase
 
 
   case class RequestResponse[T <: RecipeBase](message: String,
@@ -56,35 +47,7 @@ object Domain {
 
   case class RequestExceptionResponse(message: String, required: String)
 
-
-  object DeleteResponseImplicits {
-    implicit val deleteResponseEncoder: Encoder[DeleteResponse] = deriveEncoder[DeleteResponse]
-    implicit val deleteResponseDecoder: Decoder[DeleteResponse] = deriveDecoder[DeleteResponse]
-  }
-  object RequestResponseImplicits {
-    // Encoder and Decoder for RecipeBase
-
-    import RecipeRequestImplicits._
-    import RecipeResponseImplicits._
-
-    implicit val recipeEncoder: Encoder[Recipe] = deriveEncoder[Recipe]
-    implicit val recipeDecoder: Decoder[Recipe] = deriveDecoder[Recipe]
-
-    // Encoder and Decoder for RequestResponse
-    implicit def requestResponseEncoder[T <: RecipeBase : Encoder]: Encoder[RequestResponse[T]] =
-      deriveEncoder[RequestResponse[T]]
-
-    implicit def requestResponseDecoder[T <: RecipeBase : Decoder]: Decoder[RequestResponse[T]] =
-      deriveDecoder[RequestResponse[T]]
-  }
-
-  object RequestExceptionResponseImplicits {
-    // Encoder and Decoder for RecipeBase
-
-    implicit val requestExceptionResponseEncoder: Encoder[RequestExceptionResponse] = deriveEncoder[RequestExceptionResponse]
-    implicit val requestExceptionResponseDecoder: Decoder[RequestExceptionResponse] = deriveDecoder[RequestExceptionResponse]
-  }
-
+  case class MissingFields(fields: List[String])
 
   object ResponseMessages {
 

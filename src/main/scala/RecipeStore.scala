@@ -1,6 +1,7 @@
-import Domain.{RecipeBase, RecipeResponse}
+import Domain.{RecipeBase, RecipeWithId}
 import RecipeMain.db
 import RecipeTableSchemas.{RecipeTable, Recipes, recipesBaseQuery}
+import com.typesafe.scalalogging.LazyLogging
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -8,9 +9,9 @@ import java.time.Instant
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-object RecipeStore {
+object RecipeStore extends LazyLogging {
 
-  def createRecipe(recipe: RecipeBase): Future[RecipeTable]={
+  def createRecipe(recipe: RecipeBase): Future[RecipeTable] = {
 
     val newRecipe = RecipeTable(title = recipe.title.getOrElse(""),
       making_time = recipe.making_time.getOrElse(""),
@@ -21,41 +22,47 @@ object RecipeStore {
     val insertAction = recipesBaseQuery += newRecipe
     val insertFuture: Future[Int] = db.run(insertAction)
 
-    println("CREATING NEW RECIPE")
+
     insertFuture.transform {
-      case Success(value)=>
-        println("Successfully created "+value)
+      case Success(value) =>
+        logger.info(s"Successfully created the recipe with id: $value")
         Success(newRecipe.copy(id = Some(value)))
       case scala.util.Failure(exception) =>
-        println("Creation failed due to:  "+exception.getMessage)
+        logger.error(s"Recipe creation failed: ${exception.getMessage}")
         throw new NoSuchElementException
     }
   }
 
-  def getAllRecipes(): Future[List[RecipeTable]]={
+  def getAllRecipes(): Future[List[RecipeTable]] = {
     // Fetch all recipes
     val fetchAllRecipesAction = recipesBaseQuery.result
 
     // Run the query
     val allRecipesFuture = db.run(fetchAllRecipesAction)
 
-    allRecipesFuture.transform{
-      case Success(values) => Success(values.map(x=> x.copy()).toList)
-      case exception: Exception => Failure(exception)
+    allRecipesFuture.transform {
+      case Success(values) =>
+        logger.info(s"Successfully fetched all recipes")
+        Success(values.map(x => x.copy()).toList)
+      case Failure(exception) => Failure(exception)
     }
   }
 
-  def getRecipeById(id: Long): Future[RecipeTable] ={
-    // Fetch all recipes
+  def getRecipeById(id: Long): Future[RecipeTable] = {
+    // Fetch required recipe with id
     val fetchAllRecipesAction = recipesBaseQuery.filter(_.id === id).result.headOption
 
     // Run the query
     val allRecipesFuture = db.run(fetchAllRecipesAction)
 
-    allRecipesFuture.transform{
-      case Success(Some(value)) => Success(value)
-      case Success(values) if values.isEmpty => throw new NoSuchElementException("Item not found")
-      case exception: Exception => Failure(exception)
+    allRecipesFuture.transform {
+      case Success(Some(value)) =>
+        logger.info(s"Successfully fetched recipe: ${value.id.getOrElse(0)}")
+        Success(value)
+      case Success(values) if values.isEmpty =>
+        logger.error(s"Recipe: $id not found")
+        throw new NoSuchElementException("Item not found")
+      case Failure(exception) => Failure(exception)
     }
   }
 
@@ -73,21 +80,29 @@ object RecipeStore {
     val allRecipesFuture = db.run(fetchAllRecipesAction)
 
     allRecipesFuture.transform {
-      case Success(value)=> Success(recipeToUpdate.copy(id = Some(value)))
-      case scala.util.Failure(exception) => throw new NoSuchElementException
+      case Success(value) =>
+        logger.info(s"Successfully updated recipe: ${id}")
+        Success(recipeToUpdate.copy(id = Some(value)))
+      case scala.util.Failure(exception) =>
+        logger.error(s"Updation for recipe: ${id} failed")
+        throw new NoSuchElementException
     }
   }
 
-  def deleteRecipe(id: Long): Future[Int] ={
+  def deleteRecipe(id: Long): Future[Int] = {
     // Fetch all recipes
     val fetchAllRecipesAction = recipesBaseQuery.filter(_.id === id).delete
 
     // Run the query
     val allRecipesFuture = db.run(fetchAllRecipesAction)
 
-    allRecipesFuture.transform{
-      case Success(value) => Success(value)
-      case exception: Exception => Failure(exception)
+    allRecipesFuture.transform {
+      case Success(value) =>
+        logger.info(s"Successfully deleted recipe: ${id}")
+        Success(value)
+      case Failure(exception) =>
+        logger.error(s"Encountered error while deleting recipe: ${id}. Message: ${exception.getMessage}")
+        Failure(exception)
     }
   }
 }

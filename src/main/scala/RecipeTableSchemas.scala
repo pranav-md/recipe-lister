@@ -1,4 +1,4 @@
-import Domain.{Recipe, RecipeResponse, RecipeSubset}
+import Domain.{RecipeFull, RecipeWithId, RecipeSubset}
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.ProvenShape
 
@@ -16,13 +16,14 @@ object RecipeTableSchemas {
                          cost: Long,
                          created_at: Instant,
                          updated_at: Instant) {
-    def getRecipeWithAllFields(): Recipe = {
-      Recipe(id, Some(title), Some(making_time), Some(serves), Some(ingredients), Some(cost), created_at, updated_at)
+    def getRecipeWithAllFields(): RecipeFull = {
+      RecipeFull(id, Some(title), Some(making_time), Some(serves), Some(ingredients), Some(cost), created_at, updated_at)
     }
 
-    def getRecipeDetails(): RecipeResponse = {
-      RecipeResponse(id, Some(title), Some(making_time), Some(serves), Some(ingredients), Some(cost))
+    def getRecipeDetails(): RecipeWithId = {
+      RecipeWithId(id, Some(title), Some(making_time), Some(serves), Some(ingredients), Some(cost))
     }
+
     def getRecipeSubset(): RecipeSubset = {
       RecipeSubset(Some(title), Some(making_time), Some(serves), Some(ingredients), Some(cost))
     }

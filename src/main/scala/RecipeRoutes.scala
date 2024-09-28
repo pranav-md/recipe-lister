@@ -1,25 +1,25 @@
-import Domain.{DeleteResponse, Recipe, RecipeBase, RecipeResponse, RecipeSubset, RequestExceptionResponse, RequestResponse, ResponseMessages}
-import Exceptions.MissingFields
+import Domain.{DeleteResponse, RecipeFull, RecipeBase, RecipeWithId, RecipeSubset, RequestExceptionResponse, RequestResponse, ResponseMessages}
+import Domain.MissingFields
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives.{complete, get, onComplete, path, pathPrefix}
 import akka.http.scaladsl.server.{Directive1, MalformedRequestContentRejection, PathMatchers, Route}
 import akka.http.scaladsl.server.directives.DebuggingDirectives
 import akka.http.scaladsl.server.Directives._
-import Domain.RecipeRequestImplicits._
-import Domain.RecipeResponseImplicits._
-import Domain.DeleteResponseImplicits._
+import Implicits.RecipeRequestImplicits._
+import Implicits.RecipeResponseImplicits._
+import Implicits.DeleteResponseImplicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import MarshallerImplicits.AkkaCirceSupport._
+import Helper.MarshallerImplicits.AkkaCirceSupport._
 import io.circe.syntax._
-import Domain.RequestResponseImplicits._
-import Domain.RequestExceptionResponseImplicits._
-import io.circe.{Json, JsonObject}
+import Implicits.RequestResponseImplicits._
+import Implicits.RequestExceptionResponseImplicits._
+import Helper.{completeResponse, renameField, validateRecipe}
+import com.typesafe.scalalogging.{LazyLogging, Logger}
 
-
-object RecipeRoutes {
+object RecipeRoutes extends LazyLogging {
 
   val RECIPE_ROUTE = "recipes"
 
@@ -36,28 +36,30 @@ object RecipeRoutes {
           val insertedRecipeFuture = RecipeService.createRecipe(body)
           insertedRecipeFuture.transform {
             case Success(insertedRecipe) =>
-              val res = RequestResponse[Recipe](ResponseMessages.CREATE_SUCCESS, List(insertedRecipe))
+              val res = RequestResponse[RecipeFull](ResponseMessages.CREATE_SUCCESS, List(insertedRecipe))
               Success(res.asJson)
+            case Failure(exception) => Failure(exception)
           }
-        case missingFields: MissingFields if missingFields.fields.nonEmpty =>
+        case missingFields: MissingFields =>
+          logger.info(s"Found fields: ${missingFields.fields.mkString(", ")} missing.")
           val res = RequestExceptionResponse(ResponseMessages.CREATE_FAILURE, missingFields.fields.mkString("", ", ", ""))
           Future(res.asJson)
       }
 
       onComplete(res) {
         case Success(response) =>
-          complete(HttpEntity(ContentTypes.`application/json`, response.noSpaces))
+          completeResponse(response.asJson)
       }
     }
   }
 
   val getRecipeRequest = get {
     val recipes = RecipeService.getAllRecipes()
-    onComplete(recipes.map(RequestResponse[RecipeResponse]("", _))) {
+    onComplete(recipes.map(RequestResponse[RecipeWithId]("", _))) {
       case Success(resp) =>
         val response = renameField(resp.asJson, "recipe", "recipes")
           .mapObject(_.remove("message"))
-        complete(HttpEntity(ContentTypes.`application/json`, response.noSpaces))
+        completeResponse(response.asJson)
     }
   }
 
@@ -65,8 +67,7 @@ object RecipeRoutes {
     get {
       onComplete {
         val res = RecipeService.getRecipeById(recipeId)
-
-        res.map(recipe => RequestResponse[RecipeResponse](
+        res.map(recipe => RequestResponse[RecipeWithId](
           ResponseMessages.GET_BY_ID_SUCCESS,
           List(recipe)))
       } {
@@ -80,13 +81,13 @@ object RecipeRoutes {
     patch {
       entity(as[RecipeSubset]) { body =>
         onComplete {
-          val res = RecipeService.updateRecipeById(recipeId, body)
-          res.map(recipe => RequestResponse[RecipeSubset](
+          val response = RecipeService.updateRecipeById(recipeId, body)
+          response.map(recipe => RequestResponse[RecipeSubset](
             ResponseMessages.UPDATE_SUCCESS,
             List(recipe)))
         } {
           case Success(resp) =>
-            complete(HttpEntity(ContentTypes.`application/json`, resp.asJson.toString))
+            completeResponse(resp.asJson)
         }
       }
     }
@@ -98,38 +99,12 @@ object RecipeRoutes {
         RecipeService.deleteRecipeById(recipeId)
       } {
         case Success(_) =>
-          val resp = DeleteResponse(ResponseMessages.DELETE_SUCCESS)
-          complete(HttpEntity(ContentTypes.`application/json`, resp.asJson.toString))
+          val response = DeleteResponse(ResponseMessages.DELETE_SUCCESS)
+          completeResponse(response.asJson)
         case Failure(_) =>
-          val resp = DeleteResponse(ResponseMessages.DELETE_FAILURE)
-          complete(HttpEntity(ContentTypes.`application/json`, resp.asJson.toString))
+          val response = DeleteResponse(ResponseMessages.DELETE_FAILURE)
+          completeResponse(response.asJson)
       }
     }
   }
-
-  def validateRecipe(recipe: RecipeBase): MissingFields = {
-    // Collect missing fields
-    val missingFields = List(
-      recipe.title.fold("title")(t => ""),
-      recipe.making_time.fold("making_time")(t => ""),
-      recipe.serves.fold("serves")(s => ""),
-      recipe.ingredients.fold("ingredients")(i => ""),
-      recipe.cost.fold("cost")(c => "")
-    ).filter(_.nonEmpty)
-
-    MissingFields(missingFields)
-  }
-
-  def renameField(json: Json, oldField: String, newField: String): Json = {
-    json.asObject.map { jsonObj =>
-      // Convert JsonObject to Map and rename the field
-      val updatedJsonObj = JsonObject.fromMap(
-        jsonObj.toMap.map {
-          case (`oldField`, value) => newField -> value  // Rename the field
-          case other => other                            // Keep the rest unchanged
-        }
-      )
-      Json.fromJsonObject(updatedJsonObj)
-    }
-  }.getOrElse(Json.obj())
 }
